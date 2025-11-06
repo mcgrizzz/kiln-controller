@@ -1,3 +1,4 @@
+
 import logging
 import os
 from digitalio import DigitalInOut
@@ -33,13 +34,13 @@ currency_type   = "$"   # Currency Symbol to show when calculating cost to run j
 # Blinka supports many different boards. I've only tested raspberry pi.
 #
 # First you must decide whether to use hardware spi or software spi.
-# 
+#
 # Hardware SPI
 #
 # - faster
 # - requires 3 specific GPIO pins be used on rpis
-# - no pins are listed in this config file 
-# 
+# - no pins are listed in this config file
+#
 # Software SPI
 #
 # - slower (which will not matter for reading a thermocouple
@@ -55,7 +56,7 @@ currency_type   = "$"   # Currency Symbol to show when calculating cost to run j
 #    SPI0_SCLK = BCM pin 11 = CLK on the adafruit-31855
 #    SPI0_MOSI = BCM pin 10 = not connected
 #    SPI0_MISO = BCM pin 9  = D0 on the adafruit-31855
-#   
+#
 # plus a GPIO output to connect to CS. You can use any GPIO pin you want.
 # I chose gpio pin 5:
 #
@@ -84,19 +85,19 @@ currency_type   = "$"   # Currency Symbol to show when calculating cost to run j
 
 try:
     import board
-    spi_sclk  = board.D17    #spi clock
-    spi_miso  = board.D27    #spi Microcomputer In Serial Out
-    spi_cs    = board.D22    #spi Chip Select
-    spi_mosi  = board.D10    #spi Microcomputer Out Serial In (not connected) 
-    gpio_heat = board.D23    #output that controls relay
-    gpio_heat_invert = False #invert the output state
+    spi_sclk  = board.D11    #spi clock
+    spi_miso  = board.D9    #spi Microcomputer In Serial Out
+    spi_cs    = board.D5    #spi Chip Select
+    spi_mosi  = board.D10    #spi Microcomputer Out Serial In (not connected)
+    gpio_heat = board.D26    #output that controls relay
+    gpio_heat_invert = False  #invert the output state
 except (NotImplementedError,AttributeError):
     print("not running on blinka recognized board, probably a simulation")
 
 #######################################
 ### Thermocouple breakout boards
 #######################################
-# There are only two breakoutboards supported. 
+# There are only two breakoutboards supported.
 #   max31855 - only supports type K thermocouples
 #   max31856 - supports many thermocouples
 max31855 = 1
@@ -117,17 +118,17 @@ thermocouple_type = adafruit_max31856.ThermocoupleType.K
 
 ########################################################################
 #
-# If your kiln is above the starting temperature of the schedule when you 
-# click the Start button... skip ahead and begin at the first point in 
+# If your kiln is above the starting temperature of the schedule when you
+# click the Start button... skip ahead and begin at the first point in
 # the schedule matching the current kiln temperature.
 seek_start = True
 
 ########################################################################
 #
 # duty cycle of the entire system in seconds
-# 
-# Every N seconds a decision is made about switching the relay[s] 
-# on & off and for how long. The thermocouple is read 
+#
+# Every N seconds a decision is made about switching the relay[s]
+# on & off and for how long. The thermocouple is read
 # temperature_average_samples times during and the average value is used.
 sensor_time_wait = 2
 
@@ -137,13 +138,12 @@ sensor_time_wait = 2
 #   PID parameters
 #
 # These parameters control kiln temperature change. These settings work
-# well with the simulated oven. You must tune them to work well with 
+# well with the simulated oven. You must tune them to work well with
 # your specific kiln. Note that the integral pid_ki is
-# inverted so that a smaller number means more integral action.
-pid_kp = 10   # Proportional 25,200,200
-pid_ki = 80   # Integral
-pid_kd = 220.83497910261562 # Derivative
-
+# inverted so that a smaller number means more integral action
+pid_kp = 2.595394755294812
+pid_ki = 103.5757714439529
+pid_kd = 174.42351360130323
 ########################################################################
 #
 # Initial heating and Integral Windup
@@ -155,7 +155,7 @@ stop_integral_windup = True
 ########################################################################
 #
 #   Simulation parameters
-simulate = True
+simulate = False
 sim_t_env      = 65   # deg
 sim_c_heat     = 500.0  # J/K  heat capacity of heat element
 sim_c_oven     = 5000.0 # J/K  heat capacity of oven
@@ -192,7 +192,7 @@ emergency_shutoff_temp = 2264 #cone 7
 # and cooling as fast as possible and not continuing until temp is reached.
 kiln_must_catch_up = True
 
-# This setting is required. 
+# This setting is required.
 # This setting defines the window within which PID control occurs.
 # Outside this window (N degrees below or above the current target)
 # the elements are either 100% on because the kiln is too cold
@@ -208,10 +208,10 @@ pid_control_window = 5 #degrees
 thermocouple_offset=0
 
 # number of samples of temperature to take over each duty cycle.
-# The larger the number, the more load on the board. K type 
-# thermocouples have a precision of about 1/2 degree C. 
+# The larger the number, the more load on the board. K type
+# thermocouples have a precision of about 1/2 degree C.
 # The median of these samples is used for the temperature.
-temperature_average_samples = 10 
+temperature_average_samples = 10
 
 # Thermocouple AC frequency filtering - set to True if in a 50Hz locale, else leave at False for 60Hz locale
 ac_freq_50hz = False
@@ -238,10 +238,10 @@ ignore_tc_cold_junction_temp_low = False
 ignore_tc_temp_high = False
 ignore_tc_temp_low = False
 ignore_tc_voltage_error = False
-ignore_tc_short_errors = False 
+ignore_tc_short_errors = False
 ignore_tc_unknown_error = False
 
-# This overrides all possible thermocouple errors and prevents the 
+# This overrides all possible thermocouple errors and prevents the
 # process from exiting.
 ignore_tc_too_many_errors = False
 
@@ -264,8 +264,8 @@ automatic_restart_state_file = os.path.abspath(os.path.join(os.path.dirname( __f
 # created a repo where anyone can contribute profiles. The objective is
 # to load profiles from this repository by default.
 # See https://github.com/jbruce12000/kiln-profiles
-kiln_profiles_directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ),"storage", "profiles")) 
-#kiln_profiles_directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ),'..','kiln-profiles','pottery')) 
+kiln_profiles_directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ),"storage", "profiles"))
+#kiln_profiles_directory = os.path.abspath(os.path.join(os.path.dirname( __file__ ),'..','kiln-profiles','pottery'))
 
 
 ########################################################################
